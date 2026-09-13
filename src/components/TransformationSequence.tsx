@@ -3,6 +3,7 @@
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
+import { audioEngine } from "@/utils/AudioEngine";
 
 interface Props {
   onComplete: () => void;
@@ -37,6 +38,7 @@ export default function TransformationSequence({ onComplete, fileName, isDataRea
 
   useEffect(() => {
     if (phase === "reorganizing" && isDataReady) {
+      audioEngine.playMagicChime();
       onComplete();
     }
   }, [phase, isDataReady, onComplete]);

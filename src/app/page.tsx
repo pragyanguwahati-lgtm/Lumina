@@ -9,6 +9,7 @@ import RevisionNotes from "@/components/RevisionNotes";
 import Quiz from "@/components/Quiz";
 import ExportSection from "@/components/ExportSection";
 import { GeneratedData } from "@/types";
+import { audioEngine } from "@/utils/AudioEngine";
 
 export default function Home() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -44,11 +45,13 @@ export default function Home() {
       alert("An error occurred during transformation. Please try again.");
       setUploadedFile(null);
       setIsTransforming(false);
+      audioEngine.stopAmbientFocus();
     }
   };
 
   const handleTransformationComplete = () => {
     setIsTransforming(false);
+    audioEngine.stopAmbientFocus();
     if (generatedData) {
       setIsComplete(true);
       // Wait for DOM to render then scroll to notes
