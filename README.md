@@ -28,7 +28,7 @@ Designed with deep focus in mind, the UI features a "late-night study" aesthetic
 
 ## 🚀 Live Demo
 
-*(Vercel deployment link coming soon)*
+Experience LUMINA live here: **[https://lumina-seven-dusky.vercel.app/](https://lumina-seven-dusky.vercel.app/)**
 
 ---
 
