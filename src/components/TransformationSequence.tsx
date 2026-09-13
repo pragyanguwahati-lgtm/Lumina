@@ -38,7 +38,6 @@ export default function TransformationSequence({ onComplete, fileName, isDataRea
 
   useEffect(() => {
     if (phase === "reorganizing" && isDataReady) {
-      audioEngine.playMagicChime();
       onComplete();
     }
   }, [phase, isDataReady, onComplete]);

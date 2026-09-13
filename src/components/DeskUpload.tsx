@@ -19,7 +19,8 @@ export default function DeskUpload({ onFileAccepted }: DeskUploadProps) {
       if (acceptedFiles.length > 0) {
         setIsHovering(false);
         audioEngine.init();
-        audioEngine.playAmbientFocus();
+        audioEngine.playUploadSuccess();
+        audioEngine.startFocusMode();
         // Animate the drop weight
         await controls.start({
           scale: 0.95,

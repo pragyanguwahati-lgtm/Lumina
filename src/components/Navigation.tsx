@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { audioEngine } from "@/utils/AudioEngine";
 
 const NAV_ITEMS = [
   { id: "upload", label: "Upload" },
@@ -55,8 +54,6 @@ export default function Navigation() {
             <button
               key={item.id}
               onClick={() => {
-                audioEngine.init();
-                audioEngine.playPageTurn();
                 const el = document.getElementById(item.id);
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}

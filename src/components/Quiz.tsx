@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QuizQuestion } from "@/types";
 import { Check, X } from "lucide-react";
-import { audioEngine } from "@/utils/AudioEngine";
 
 interface Props {
   data: { questions: QuizQuestion[] };
@@ -27,12 +26,10 @@ export default function Quiz({ data }: Props) {
   const handleCheckAnswer = () => {
     if (question.type === "short" && !shortAnswerText) return;
     if (question.type !== "short" && !selectedAnswer) return;
-    audioEngine.playPageTurn();
     setIsRevealed(true);
   };
 
   const handleNext = () => {
-    audioEngine.playPageTurn();
     setIsRevealed(false);
     setSelectedAnswer(null);
     setShortAnswerText("");

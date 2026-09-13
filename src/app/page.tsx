@@ -45,13 +45,14 @@ export default function Home() {
       alert("An error occurred during transformation. Please try again.");
       setUploadedFile(null);
       setIsTransforming(false);
-      audioEngine.stopAmbientFocus();
+      audioEngine.stopFocusMode();
     }
   };
 
   const handleTransformationComplete = () => {
     setIsTransforming(false);
-    audioEngine.stopAmbientFocus();
+    audioEngine.stopFocusMode();
+    audioEngine.playSummaryFinished();
     if (generatedData) {
       setIsComplete(true);
       // Wait for DOM to render then scroll to notes
