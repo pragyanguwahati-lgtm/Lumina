@@ -3,8 +3,7 @@
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { UploadCloud, FileText, CheckCircle } from "lucide-react";
-import { audioEngine } from "@/utils/AudioEngine";
+import { Upload, FileText, CheckCircle } from "lucide-react";
 
 interface DeskUploadProps {
   onFileAccepted: (file: File) => void;
@@ -18,9 +17,6 @@ export default function DeskUpload({ onFileAccepted }: DeskUploadProps) {
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         setIsHovering(false);
-        audioEngine.init();
-        audioEngine.playUploadSuccess();
-        audioEngine.startFocusMode();
         // Animate the drop weight
         await controls.start({
           scale: 0.95,
@@ -114,7 +110,7 @@ export default function DeskUpload({ onFileAccepted }: DeskUploadProps) {
                 {isDragReject ? (
                   <FileText size={32} className="text-red-400" />
                 ) : isDragActive ? (
-                  <UploadCloud size={32} className="text-brand-gold" />
+                  <Upload size={32} className="text-brand-gold" />
                 ) : (
                   <FileText size={32} />
                 )}
