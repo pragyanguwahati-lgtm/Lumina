@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   turbopack: {},
+  output: 'standalone',
 };
 
 export default nextConfig;
