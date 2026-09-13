@@ -9,7 +9,6 @@ import RevisionNotes from "@/components/RevisionNotes";
 import Quiz from "@/components/Quiz";
 import ExportSection from "@/components/ExportSection";
 import { GeneratedData } from "@/types";
-import { audioEngine } from "@/utils/AudioEngine";
 
 export default function Home() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
