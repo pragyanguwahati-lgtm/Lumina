@@ -3,7 +3,6 @@
 import { motion, useAnimation } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
-import { audioEngine } from "@/utils/AudioEngine";
 
 interface Props {
   onComplete: () => void;
