@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { GeneratedData } from '@/types';
 
 // Register fonts if needed. For now, we'll use standard fonts to ensure reliability

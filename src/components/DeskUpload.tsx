@@ -3,7 +3,7 @@
 import { motion, useAnimation } from "framer-motion";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, FileText, CheckCircle } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 
 interface DeskUploadProps {
   onFileAccepted: (file: File) => void;

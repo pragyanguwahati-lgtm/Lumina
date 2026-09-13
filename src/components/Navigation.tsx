@@ -53,11 +53,12 @@ export default function Navigation() {
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
+              aria-label={`Navigate to ${item.label}`}
               onClick={() => {
                 const el = document.getElementById(item.id);
                 if (el) el.scrollIntoView({ behavior: "smooth" });
               }}
-              className="relative text-sm tracking-widest uppercase transition-colors duration-500 hover:text-brand-primary text-brand-muted"
+              className="relative text-sm tracking-widest uppercase transition-colors duration-500 hover:text-brand-primary text-brand-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg rounded-md px-2 py-1"
             >
               <span className={active === item.id ? "text-brand-primary" : ""}>
                 {item.label}

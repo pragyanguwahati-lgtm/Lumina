@@ -17,7 +17,7 @@ export default function ExportSection({ data }: Props) {
     try {
       // Dynamically import the pdf builder to avoid SSR and Turbopack chunk issues on mount
       const { pdf } = await import("@react-pdf/renderer");
-      // @ts-ignore (we know ExportDocument exists, using dynamic import)
+      // @ts-expect-error (we know ExportDocument exists, using dynamic import)
       const { ExportDocument } = await import("./PDFExport");
       
       const blob = await pdf(<ExportDocument data={data} />).toBlob();

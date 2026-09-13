@@ -114,8 +114,9 @@ Do not include any other text outside this JSON.
         "Transfer-Encoding": "chunked",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API Error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Failed to process document" }), { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Failed to process document";
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 }
