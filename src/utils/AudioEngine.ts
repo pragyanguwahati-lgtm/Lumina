@@ -1,133 +1,106 @@
+import { Howl, Howler } from 'howler';
+
 class AudioEngine {
-  private ctx: AudioContext | null = null;
-  private ambientGain: GainNode | null = null;
   private isAmbientPlaying = false;
+  
+  // Ambient Tracks (Loops)
+  private rain: Howl | null = null;
+  private fireplace: Howl | null = null;
+  private library: Howl | null = null;
+
+  // SFX
+  private pageTurn: Howl | null = null;
+  private chime: Howl | null = null;
+
+  private isInitialized = false;
 
   public init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (this.isInitialized) return;
+    
+    // Enable audio context if it was suspended
+    if (Howler.ctx && Howler.ctx.state === 'suspended') {
+      Howler.ctx.resume();
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+
+    // Initialize multi-track ambient loops
+    this.rain = new Howl({
+      src: ['/sounds/rain.mp3'],
+      loop: true,
+      volume: 0,
+      html5: true, // Stream large audio files
+    });
+
+    this.fireplace = new Howl({
+      src: ['/sounds/fireplace.mp3'],
+      loop: true,
+      volume: 0,
+      html5: true,
+    });
+
+    this.library = new Howl({
+      src: ['/sounds/library.mp3'],
+      loop: true,
+      volume: 0,
+      html5: true,
+    });
+
+    // Initialize UI SFX
+    this.pageTurn = new Howl({
+      src: ['/sounds/page-turn.mp3'],
+      volume: 0.6,
+    });
+
+    this.chime = new Howl({
+      src: ['/sounds/chime.mp3'],
+      volume: 0.4,
+    });
+
+    this.isInitialized = true;
   }
 
   public playAmbientFocus() {
-    if (!this.ctx || this.isAmbientPlaying) return;
+    if (this.isAmbientPlaying || !this.isInitialized) return;
     this.isAmbientPlaying = true;
 
-    // Create a very deep, soothing ambient drone
-    const osc1 = this.ctx.createOscillator();
-    const osc2 = this.ctx.createOscillator();
-    const filter = this.ctx.createBiquadFilter();
-    const lfo = this.ctx.createOscillator();
-    const lfoGain = this.ctx.createGain();
-    const masterGain = this.ctx.createGain();
+    // Start playback (if not already playing)
+    if (!this.rain?.playing()) this.rain?.play();
+    if (!this.fireplace?.playing()) this.fireplace?.play();
+    if (!this.library?.playing()) this.library?.play();
 
-    osc1.type = 'sine';
-    osc2.type = 'triangle';
-    
-    // Very low frequencies for a 'room tone' feel
-    osc1.frequency.value = 55; // A1
-    osc2.frequency.value = 55.5; // Slight detune for phasing
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 150; // Very muffled
-    filter.Q.value = 1;
-
-    // LFO to slowly modulate the filter to make it "breathe"
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.1; // Very slow (10s cycle)
-    lfoGain.gain.value = 50;
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-
-    masterGain.gain.value = 0; // Start silent, fade in
-    masterGain.gain.linearRampToValueAtTime(0.15, this.ctx.currentTime + 5); // 5s fade in
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(masterGain);
-    masterGain.connect(this.ctx.destination);
-
-    osc1.start();
-    osc2.start();
-    lfo.start();
-
-    this.ambientGain = masterGain;
+    // Fade in the ambient mix for a deep focus atmosphere
+    this.rain?.fade(0, 0.4, 4000);
+    this.fireplace?.fade(0, 0.5, 4000);
+    this.library?.fade(0, 0.2, 4000);
   }
 
   public stopAmbientFocus() {
-    if (!this.ctx || !this.ambientGain) return;
+    if (!this.isInitialized) return;
     
-    // Fade out over 3 seconds
-    this.ambientGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 3);
+    // Smoothly fade out all ambient tracks over 3 seconds
+    this.rain?.fade(this.rain.volume(), 0, 3000);
+    this.fireplace?.fade(this.fireplace.volume(), 0, 3000);
+    this.library?.fade(this.library.volume(), 0, 3000);
+
     setTimeout(() => {
-      this.ambientGain?.disconnect();
-      this.ambientGain = null;
+      this.rain?.stop();
+      this.fireplace?.stop();
+      this.library?.stop();
       this.isAmbientPlaying = false;
     }, 3000);
   }
 
   public playPageTurn() {
-    if (!this.ctx) return;
-
-    // A synthetic paper rustle using filtered noise
-    const bufferSize = this.ctx.sampleRate * 0.5; // 0.5 seconds
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
-    }
-
-    const noiseSource = this.ctx.createBufferSource();
-    noiseSource.buffer = buffer;
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1200;
-    filter.Q.value = 0.5;
-
-    const env = this.ctx.createGain();
-    env.gain.setValueAtTime(0, this.ctx.currentTime);
-    env.gain.linearRampToValueAtTime(0.3, this.ctx.currentTime + 0.05); // quick attack
-    env.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3); // papery decay
-
-    noiseSource.connect(filter);
-    filter.connect(env);
-    env.connect(this.ctx.destination);
-
-    noiseSource.start();
+    if (!this.isInitialized) return;
+    // Play with slight random pitch variation for realism
+    const rate = 0.9 + Math.random() * 0.2;
+    this.pageTurn?.rate(rate);
+    this.pageTurn?.play();
   }
 
   public playMagicChime() {
-    if (!this.ctx) return;
-
-    // A subtle, ethereal chime for when the AI finishes
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, this.ctx.currentTime); // A5
-    osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 2); // Drop pitch slightly
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
-
-    gain.gain.setValueAtTime(0, this.ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.2, this.ctx.currentTime + 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 3);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start();
-    osc.stop(this.ctx.currentTime + 3);
+    if (!this.isInitialized) return;
+    this.chime?.play();
   }
 }
 
-// Export a singleton instance
 export const audioEngine = new AudioEngine();
