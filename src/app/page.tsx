@@ -1,116 +1,54 @@
 "use client";
 
-import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Hero from "@/components/Hero";
-import DeskUpload from "@/components/DeskUpload";
-import TransformationSequence from "@/components/TransformationSequence";
-import RevisionNotes from "@/components/RevisionNotes";
-import Quiz from "@/components/Quiz";
-import ExportSection from "@/components/ExportSection";
-import { GeneratedData } from "@/types";
+import { useBook } from "@/context/BookContext";
+import BookCover from "@/components/BookCover";
+import BookLayout from "@/components/BookLayout";
+import BookUploadPage from "@/components/pages/BookUploadPage";
+import BookNotesPage from "@/components/pages/BookNotesPage";
+import BookQuizPage from "@/components/pages/BookQuizPage";
+import BookExportPage from "@/components/pages/BookExportPage";
 
 export default function Home() {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isTransforming, setIsTransforming] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  const [generatedData, setGeneratedData] = useState<GeneratedData | null>(null);
-
-  const handleFileAccepted = async (file: File) => {
-    setUploadedFile(file);
-    setIsTransforming(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Failed to generate content");
-
-      // We read the entire response as text since the API streams the JSON
-      // and we just need the final parsed object.
-      const text = await response.text();
-      // Clean up markdown block if the model returned it despite instructions
-      const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
-      const data = JSON.parse(cleanText) as GeneratedData;
-      
-      setGeneratedData(data);
-    } catch (error) {
-      console.error(error);
-      alert("An error occurred during transformation. Please try again.");
-      setUploadedFile(null);
-      setIsTransforming(false);
-    }
-  };
-
-  const handleTransformationComplete = () => {
-    setIsTransforming(false);
-    if (generatedData) {
-      setIsComplete(true);
-      // Wait for DOM to render then scroll to notes
-      setTimeout(() => {
-        const el = document.getElementById("notes");
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-  };
+  const { currentPage, turnToPage } = useBook();
 
   return (
-    <div className="relative" id="upload">
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       <AnimatePresence mode="wait">
-        {!isComplete && (
+        {currentPage === "cover" ? (
           <motion.div
-            key="landing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(10px)", transition: { duration: 1.2 } }}
-            className="flex flex-col min-h-screen"
+            key="cover-view"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ 
+              opacity: 0, 
+              rotateY: -70, 
+              scale: 0.9, 
+              transition: { duration: 0.8, ease: [0.25, 1, 0.5, 1] } 
+            }}
+            className="w-full flex items-center justify-center"
           >
-            <Hero />
-            <div className="h-32" /> {/* Spacing */}
-            <DeskUpload onFileAccepted={handleFileAccepted} />
-            <div className="h-64" /> {/* Bottom Spacing */}
+            <BookCover onOpen={() => turnToPage("upload")} />
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isTransforming && uploadedFile && (
-          <TransformationSequence 
-            key="transformation"
-            fileName={uploadedFile.name} 
-            onComplete={handleTransformationComplete} 
-            isDataReady={!!generatedData}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isComplete && generatedData && (
+        ) : (
           <motion.div
-            key="content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.5 }}
+            key="book-layout"
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full"
           >
-            <div id="notes">
-              <RevisionNotes data={generatedData.notes} />
-            </div>
-            <div className="h-32" />
-            <div id="quiz">
-              <Quiz data={generatedData.quiz} />
-            </div>
-            <div className="h-32" />
-            <div id="export">
-              <ExportSection data={generatedData} />
-            </div>
+            <BookLayout>
+              {currentPage === "upload" && <BookUploadPage />}
+              {currentPage === "notes" && <BookNotesPage />}
+              {currentPage === "quiz" && <BookQuizPage />}
+              {currentPage === "export" && <BookExportPage />}
+            </BookLayout>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import "./globals.css";
 import LenisProvider from "../components/LenisProvider";
 import Atmosphere from "../components/Atmosphere";
 import Navigation from "../components/Navigation";
+import { BookProvider } from "../context/BookContext";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -17,8 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LUMINA | AI-Powered Student Workspace",
-  description: "Turn lectures into mastery with AI-generated revision notes and quizzes.",
+  title: "LUMINA | Turn Lectures Into Mastery",
+  description: "Tactile AI-powered study journal that turns lecture materials into mastery revision notes and practice exams.",
 };
 
 export default function RootLayout({
@@ -29,14 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="antialiased min-h-screen flex flex-col relative selection:bg-brand-gold/30 selection:text-brand-primary">
-        <LenisProvider>
-          <Atmosphere />
-          <Navigation />
-          <main className="flex-grow relative z-10">
-            {children}
-          </main>
-        </LenisProvider>
+        <BookProvider>
+          <LenisProvider>
+            <Atmosphere />
+            <Navigation />
+            <main className="flex-grow relative z-10 pt-16">
+              {children}
+            </main>
+          </LenisProvider>
+        </BookProvider>
       </body>
     </html>
   );
 }
+

@@ -45,7 +45,12 @@
 /* Custom utility classes */
 @layer utilities {
   .text-shadow-gold {
-    text-shadow: 0 0 20px rgba(212, 169, 90, 0.3);
+    text-shadow: 0 0 20px rgba(212, 169, 90, 0.4), 0 0 40px rgba(212, 169, 90, 0.2);
+  }
+
+  .text-emboss-gold {
+    color: #D4A95A;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 -1px 1px rgba(255, 235, 180, 0.3);
   }
   
   .glass-panel {
@@ -59,4 +64,60 @@
     inset: 0;
     z-index: 50;
   }
+
+  /* Notebook Paper & 3D Book Utilities */
+  .notebook-paper {
+    background-color: #F8F6F0;
+    color: #242220;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(200, 195, 185, 0.55) 28px
+    );
+    background-size: 100% 28px;
+    background-attachment: local;
+    position: relative;
+  }
+
+  .notebook-margin-left {
+    box-shadow: inset -1px 0 0 rgba(220, 110, 110, 0.5);
+  }
+
+  .notebook-margin-rule {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 48px;
+    width: 1px;
+    background-color: rgba(220, 110, 110, 0.5);
+    pointer-events: none;
+  }
+
+  .notebook-spine-shadow-left {
+    box-shadow: inset -22px 0 24px -10px rgba(0, 0, 0, 0.18);
+  }
+
+  .notebook-spine-shadow-right {
+    box-shadow: inset 22px 0 24px -10px rgba(0, 0, 0, 0.18);
+  }
+
+  .book-outer-shadow {
+    box-shadow: 
+      0 25px 60px -10px rgba(0, 0, 0, 0.7),
+      0 10px 25px -5px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .perspective-2000 {
+    perspective: 2000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
 }
+
