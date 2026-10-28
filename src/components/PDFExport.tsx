@@ -173,6 +173,44 @@ export const ExportDocument = ({ data, subject = "Academic Mastery" }: Props) =>
       ))}
     </Page>
 
+    {/* Specialized Code & Numericals if available */}
+    {((data.notes.codeSnippets && data.notes.codeSnippets.length > 0) || (data.notes.numericals && data.notes.numericals.length > 0)) && (
+      <Page size="A4" style={styles.page}>
+        {data.notes.codeSnippets && data.notes.codeSnippets.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Code & Algorithm Implementations</Text>
+            {data.notes.codeSnippets.map((snip, i) => (
+              <View key={i} style={{ ...styles.conceptBox, marginBottom: 12 }}>
+                <Text style={styles.defTerm}>{snip.title} ({snip.language.toUpperCase()})</Text>
+                {snip.complexity && <Text style={{ ...styles.text, color: '#7FB77E', fontSize: 10 }}>Complexity: {snip.complexity}</Text>}
+                <Text style={{ ...styles.text, fontFamily: 'Courier', fontSize: 10, color: '#F6D78C', marginVertical: 4 }}>
+                  {snip.code}
+                </Text>
+                <Text style={styles.text}>{snip.explanation}</Text>
+              </View>
+            ))}
+          </>
+        )}
+
+        {data.notes.numericals && data.notes.numericals.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Worked Numerical Derivations</Text>
+            {data.notes.numericals.map((num, i) => (
+              <View key={i} style={{ ...styles.conceptBox, marginBottom: 12 }}>
+                <Text style={styles.defTerm}>{num.title}</Text>
+                <Text style={{ ...styles.text, fontStyle: 'italic', marginBottom: 4 }}>{num.problemStatement}</Text>
+                <Text style={{ ...styles.text, color: '#D4A95A', fontSize: 11 }}>Formula: {num.formulaUsed}</Text>
+                {num.stepByStepSolution.map((st, j) => (
+                  <Text key={j} style={{ ...styles.text, fontSize: 11 }}>{st}</Text>
+                ))}
+                <Text style={{ ...styles.defTerm, color: '#7FB77E', marginTop: 4 }}>Result: {num.finalAnswer}</Text>
+              </View>
+            ))}
+          </>
+        )}
+      </Page>
+    )}
+
     {/* Quiz & Answer Key */}
     <Page size="A4" style={styles.page}>
       <Text style={styles.sectionTitle}>Practice Quiz</Text>

@@ -1,119 +1,74 @@
-import { GoogleGenAI } from "@google/genai";
 import { NextRequest } from "next/server";
+import { runOrchestratedSynthesis } from "@/lib/agents/orchestrator";
+import { synthesizeWithoutAPI } from "@/lib/agents/localSynthesizer";
+import { GeneratedData } from "@/types";
 
 export const maxDuration = 60;
 
-// Note: Using standard generateContentStream from the GenAI SDK
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
-    
-    if (!file) {
-      return new Response(JSON.stringify({ error: "No file provided" }), { status: 400 });
+    const file = formData.get("file") as File | null;
+    const textContent = formData.get("text") as string | null;
+
+    if (!file && (!textContent || textContent.trim().length === 0)) {
+      return new Response(JSON.stringify({ error: "No lecture file or text provided" }), { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "API key not configured" }), { status: 500 });
+    const hasGroq = Boolean(process.env.GROQ_API_KEY);
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    const hasOllama = Boolean(process.env.OLLAMA_BASE_URL || process.env.USE_LOCAL_OLLAMA === "true");
+
+    const sourceTitle = file 
+      ? file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      : "Computational Foundations & Architecture";
+
+    let extractedText = textContent?.trim() || "";
+
+    // If PDF uploaded, extract text directly in Node using unpdf (pure JS, 0 external API calls)
+    if (file) {
+      try {
+        const buffer = await file.arrayBuffer();
+        const { extractText } = await import("unpdf");
+        const pdfResult = await extractText(buffer);
+        const joinedText = Array.isArray(pdfResult.text) ? pdfResult.text.join("\n\n") : String(pdfResult.text || "");
+        
+        if (joinedText && joinedText.trim().length > 0) {
+          extractedText = joinedText.trim();
+        } else {
+          extractedText = `Lecture title: ${sourceTitle}. Academic lecture material focusing on core principles, definitions, formulas, and practical implementations.`;
+        }
+      } catch (pdfErr) {
+        console.warn("Direct PDF extraction notice:", pdfErr);
+        extractedText = `Lecture title: ${sourceTitle}. Academic notes and assessment review.`;
+      }
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    const buffer = await file.arrayBuffer();
-    const base64Data = Buffer.from(buffer).toString("base64");
+    // ZERO-API-KEY MODE: If no LLM keys are configured, use the built-in algorithmic engine
+    if (!hasGroq && !hasGemini && !hasOllama) {
+      const localSynthesized = synthesizeWithoutAPI(extractedText, sourceTitle);
+      return new Response(JSON.stringify(localSynthesized), {
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    }
 
-    const prompt = `
-You are an expert academic tutor. Analyze the provided lecture material and generate TWO things:
-1. Comprehensive Revision Notes
-2. A 5-Question Practice Quiz
+    // Run parallel multi-agent synthesis pipeline (Groq Llama 3.3 / Qwen Coder, Ollama, or Gemini)
+    try {
+      const orchestratedData = await runOrchestratedSynthesis({
+        textContent: extractedText,
+        sourceTitle,
+      });
 
-Please format your entire response exactly in this JSON structure (and do NOT wrap it in markdown code blocks, just return raw JSON):
-
-{
-  "notes": {
-    "chapterTitle": "string",
-    "executiveSummary": "string",
-    "keyConcepts": ["string"],
-    "importantDefinitions": [{"term": "string", "definition": "string"}],
-    "formulas": [{"name": "string", "formula": "string"}],
-    "examFocusedPoints": ["string"],
-    "memoryShortcuts": ["string"]
-  },
-  "quiz": {
-    "questions": [
-      {
-        "type": "mcq",
-        "question": "string",
-        "options": ["string", "string", "string", "string"],
-        "correctAnswer": "string (the exact option text)",
-        "explanation": "string"
-      },
-      {
-        "type": "tf",
-        "question": "string",
-        "options": ["True", "False"],
-        "correctAnswer": "True or False",
-        "explanation": "string"
-      },
-      {
-        "type": "short",
-        "question": "string",
-        "correctAnswer": "string",
-        "explanation": "string"
-      }
-    ]
-  }
-}
-
-Ensure exactly 5 questions total: 3 MCQs, 1 TF, and 1 Short Answer.
-Do not include any other text outside this JSON.
-`;
-
-    // Using gemini-3.5-flash which is fast, advanced, and supports large contexts
-    const responseStream = await ai.models.generateContentStream({
-      model: "gemini-3.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                data: base64Data,
-                mimeType: file.type || "application/pdf"
-              }
-            }
-          ]
-        }
-      ],
-      config: {
-        responseMimeType: "application/json"
-      }
-    });
-
-    // Create a ReadableStream to stream the Gemini response back to the client
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of responseStream) {
-            if (chunk.text) {
-              controller.enqueue(new TextEncoder().encode(chunk.text));
-            }
-          }
-          controller.close();
-        } catch (e) {
-          console.error("Streaming error:", e);
-          controller.error(e);
-        }
-      }
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
-      },
-    });
+      return new Response(JSON.stringify(orchestratedData), {
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    } catch (agentErr) {
+      console.warn("Orchestrator encountered error, falling back to local algorithmic engine:", agentErr);
+      const localSynthesized = synthesizeWithoutAPI(extractedText, sourceTitle);
+      return new Response(JSON.stringify(localSynthesized), {
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    }
   } catch (error: unknown) {
     console.error("API Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Failed to process document";

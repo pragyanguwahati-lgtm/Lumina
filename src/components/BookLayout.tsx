@@ -1,154 +1,301 @@
 "use client";
 
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useBook, BookPage } from "@/context/BookContext";
-import { Volume2, VolumeX, RotateCcw } from "lucide-react";
+import React, { useRef, useEffect } from "react";
+import { useBook } from "@/context/BookContext";
+import { RotateCcw } from "lucide-react";
 
 interface BookLayoutProps {
   children: React.ReactNode;
+  leftPageContent: React.ReactNode;
 }
 
-const TABS: { id: BookPage; label: string }[] = [
-  { id: "upload", label: "UPLOAD" },
-  { id: "notes", label: "NOTES" },
-  { id: "quiz", label: "QUIZ" },
-  { id: "export", label: "EXPORT" },
-];
+export default function BookLayout({ children, leftPageContent }: BookLayoutProps) {
+  const { isBookOpen, openBook, closeBook, currentPage, turnToPage, generatedData } = useBook();
+  const sceneRef = useRef<HTMLDivElement | null>(null);
+  const tiltRef = useRef<HTMLDivElement | null>(null);
+  const frontRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
 
-export default function BookLayout({ children }: BookLayoutProps) {
-  const { currentPage, turnToPage, flipDirection, soundEnabled, toggleSound, resetBook, generatedData } = useBook();
+  // 3D Tilt & Cursor Tracking Spotlight (21st.dev spotlight mechanics)
+  useEffect(() => {
+    const scene = sceneRef.current;
+    const tilt = tiltRef.current;
+    const front = frontRef.current;
+    const frame = frameRef.current;
+    if (!scene || !tilt) return;
 
-  // Page Flip Animation Variants
-  const flipVariants = {
-    initial: (direction: "next" | "prev") => ({
-      rotateY: direction === "next" ? 45 : -45,
-      opacity: 0,
-      scale: 0.98,
-      transformOrigin: direction === "next" ? "left center" : "right center",
-    }),
-    animate: {
-      rotateY: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.7,
-        ease: "easeOut" as const,
-      },
-    },
-    exit: (direction: "next" | "prev") => ({
-      rotateY: direction === "next" ? -50 : 50,
-      opacity: 0,
-      scale: 0.98,
-      transformOrigin: direction === "next" ? "left center" : "right center",
-      transition: {
-        duration: 0.5,
-        ease: "easeIn" as const,
-      },
-    }),
-  };
+    const handlePointerMove = (e: PointerEvent) => {
+      // If book is closed, perform full 3D tome tilt
+      if (!isBookOpen) {
+        const s = scene.getBoundingClientRect();
+        const cx = s.left + s.width / 2;
+        const cy = s.top + s.height / 2;
+        const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / (s.width / 2)));
+        const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / (s.height / 2)));
 
+        tilt.style.setProperty("--ry", `${dx * 8.5}deg`);
+        tilt.style.setProperty("--rx", `${-dy * 5.5}deg`);
+
+        if (front) {
+          const r = front.getBoundingClientRect();
+          front.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          front.style.setProperty("--my", `${e.clientY - r.top}px`);
+        }
+        if (frame) {
+          const r = frame.getBoundingClientRect();
+          frame.style.setProperty("--fx", `${e.clientX - r.left}px`);
+          frame.style.setProperty("--fy", `${e.clientY - r.top}px`);
+        }
+      } else {
+        tilt.style.setProperty("--rx", "0deg");
+        tilt.style.setProperty("--ry", "0deg");
+      }
+
+      // Propagate cursor spotlight coords to any hovered .ring elements
+      const activeRing = (e.target as HTMLElement)?.closest(".ring") as HTMLElement | null;
+      if (activeRing) {
+        const r = activeRing.getBoundingClientRect();
+        activeRing.style.setProperty("--fx", `${e.clientX - r.left}px`);
+        activeRing.style.setProperty("--fy", `${e.clientY - r.top}px`);
+      }
+    };
+
+    const handlePointerLeave = () => {
+      if (!isBookOpen && tilt) {
+        tilt.style.setProperty("--rx", "0deg");
+        tilt.style.setProperty("--ry", "0deg");
+      }
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    document.addEventListener("pointerleave", handlePointerLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerleave", handlePointerLeave);
+    };
+  }, [isBookOpen]);
 
   return (
-    <div className="w-full max-w-[1200px] mx-auto px-4 py-8 flex flex-col items-center">
-      {/* Top Utility Ribbon / Bar */}
-      <div className="w-full flex items-center justify-between mb-4 px-2">
-        <button
-          onClick={resetBook}
-          className="flex items-center gap-2 text-xs uppercase tracking-widest text-brand-muted hover:text-brand-gold transition-colors py-1 px-3 rounded-lg border border-brand-border/40 bg-brand-surface/30 backdrop-blur-sm"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Cover</span>
-        </button>
+    <div className={`relative w-full flex flex-col items-center justify-center transition-all duration-700 ${isBookOpen ? "opened" : ""}`}>
+      {/* Ambient Backlight Golden Halo */}
+      <div 
+        aria-hidden="true"
+        className="halo-tome"
+      />
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={toggleSound}
-            aria-label={soundEnabled ? "Mute book sound effects" : "Enable tactile sound effects"}
-            className="flex items-center gap-2 text-xs uppercase tracking-widest text-brand-muted hover:text-brand-gold transition-colors py-1 px-3 rounded-lg border border-brand-border/40 bg-brand-surface/30 backdrop-blur-sm"
+      {/* 3D Scene */}
+      <div 
+        ref={sceneRef}
+        id="scene"
+        className="scene-tome"
+      >
+        {/* Soft Floor Shadow beneath the Book */}
+        <div 
+          className="floor-tome"
+        />
+
+        {/* 3D Tilt Wrapper */}
+        <div 
+          ref={tiltRef}
+          id="tilt"
+          className="absolute inset-0 transition-transform duration-300 ease-out"
+          style={{
+            transformStyle: "preserve-3d",
+            transform: "rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))",
+          }}
+        >
+          {/* Main Book Object */}
+          <div 
+            className="book-tome"
           >
-            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-brand-gold" /> : <VolumeX className="w-3.5 h-3.5 text-brand-muted" />}
-            <span>{soundEnabled ? "Sound On" : "Sound Muted"}</span>
-          </button>
+            {/* ================= RIGHT PAGE (The Base Page) ================= */}
+            <div 
+              className={`
+                absolute inset-0 w-[var(--w)]
+                bg-gradient-to-r from-[#0f0d0a] to-[#16140f]
+                rounded-r-2xl border border-[#2a251b]
+                book-page-stack-right flex flex-col overflow-hidden
+                transition-all duration-700
+                ${isBookOpen 
+                  ? "opacity-100 pointer-events-auto z-10" 
+                  : "opacity-0 pointer-events-none z-0"}
+              `}
+            >
+              {/* Gold Ribbon Bookmark pinned to top right */}
+              <div className="bookmark-ribbon" aria-hidden="true" />
+
+              {/* Central Spine Shadow overlay */}
+              <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-black/50 to-transparent pointer-events-none z-20" />
+
+              {/* Right Page Interactive Content */}
+              <div className="relative z-10 w-full h-full flex flex-col p-5 sm:p-7 md:p-8 archival-scroll overflow-y-auto">
+                {children}
+              </div>
+            </div>
+
+            {/* ================= COVER / LEFT SPREAD ================= */}
+            <div 
+              className="cover-tome"
+              onClick={!isBookOpen ? openBook : undefined}
+            >
+              {/* --- FRONT COVER FACE (Visible when closed) --- */}
+              <div 
+                ref={frontRef}
+                className="absolute inset-0 rounded-r-2xl rounded-l-sm bg-[#0d0c0b] border border-[#26221a] overflow-hidden shadow-[inset_14px_0_0_#070706,inset_16px_0_14px_-8px_#000,0_40px_80px_rgba(0,0,0,0.7)] group"
+                style={{
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                }}
+              >
+                {/* Dual procedural SVG marble textures */}
+                <svg className="absolute -inset-[20%] w-[140%] h-[140%] -rotate-[32deg] pointer-events-none opacity-90" viewBox="0 0 800 1000" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <filter id="v1" x="0" y="0" width="100%" height="100%">
+                      <feTurbulence type="turbulence" baseFrequency="0.0045 0.014" numOctaves="4" seed="7" />
+                      <feColorMatrix values="0 0 0 0 .84  0 0 0 0 .68  0 0 0 0 .37  -13 0 0 0 2.35" />
+                    </filter>
+                    <filter id="v2" x="0" y="0" width="100%" height="100%">
+                      <feTurbulence type="turbulence" baseFrequency="0.006 0.02" numOctaves="5" seed="19" />
+                      <feColorMatrix values="0 0 0 0 .92  0 0 0 0 .92  0 0 0 0 .9  -16 0 0 0 2.5" />
+                    </filter>
+                  </defs>
+                  <rect width="800" height="1000" filter="url(#v1)" opacity="0.55" />
+                  <rect width="800" height="1000" filter="url(#v2)" opacity="0.28" />
+                </svg>
+
+                {/* Lit marble on cursor spotlight hover */}
+                <svg 
+                  className="absolute -inset-[20%] w-[140%] h-[140%] -rotate-[32deg] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 [filter:brightness(1.7)_saturate(1.2)]"
+                  style={{
+                    WebkitMaskImage: "radial-gradient(260px circle at var(--mx,50%) var(--my,50%), #000, transparent 70%)",
+                    maskImage: "radial-gradient(260px circle at var(--mx,50%) var(--my,50%), #000, transparent 70%)",
+                  }}
+                  viewBox="0 0 800 1000" 
+                  preserveAspectRatio="none" 
+                  aria-hidden="true"
+                >
+                  <rect width="800" height="1000" filter="url(#v1)" />
+                </svg>
+
+                {/* Dynamic sheen flash on hover */}
+                <div 
+                  className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-screen pointer-events-none"
+                  style={{
+                    background: "radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(214,173,95,0.18), transparent 60%)",
+                  }}
+                />
+
+                {/* Ambient vignette */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,transparent_30%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+
+                {/* Left book spine binding */}
+                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/80 via-black/40 to-transparent border-r border-white/5 pointer-events-none" />
+                <div className="absolute left-3.5 top-0 bottom-0 w-[1px] bg-[#d6ad5f]/20 pointer-events-none" />
+
+                {/* Center Inset Frame with 21st.dev Spotlight */}
+                <div 
+                  ref={frameRef}
+                  className="ring absolute z-20 border border-[#d6ad5f]/30 rounded-xl flex flex-col items-center justify-center p-6 text-center transition-colors group-hover:border-[#d6ad5f]/50"
+                  style={{
+                    top: "clamp(18px, 2.6vw, 32px)",
+                    right: "clamp(18px, 2.6vw, 32px)",
+                    bottom: "clamp(54px, 6.5vw, 72px)",
+                    left: "clamp(32px, 4vw, 48px)",
+                  }}
+                >
+                  {/* Gilded Seal with Celestial Star */}
+                  <div className="w-12 h-12 rounded-full border border-[#8a6d3b] bg-[#0b0a09]/80 backdrop-blur-xs flex items-center justify-center mb-5 shadow-md">
+                    <svg className="w-5 h-5 stroke-[#d6ad5f] fill-none stroke-[1.4]" viewBox="0 0 24 24" strokeLinecap="round">
+                      <path d="M9 4l1.6 4.4L15 10l-4.4 1.6L9 16l-1.6-4.4L3 10l4.4-1.6z" />
+                      <path d="M17.5 3v4M15.5 5h4M18 14v5M15.5 16.5h5" />
+                    </svg>
+                  </div>
+
+                  {/* Title with metallic shimmer sweep */}
+                  <h1 className="sheen-gold-text text-5xl sm:text-6xl md:text-7xl font-serif font-medium tracking-tight mb-3">
+                    Lumina
+                  </h1>
+
+                  {/* Gold hairline divider rule */}
+                  <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-[#d6ad5f] to-transparent my-2.5 opacity-80" />
+
+                  {/* Subtitle */}
+                  <p className="text-xs sm:text-sm uppercase tracking-[0.3em] text-[#c5bfb0] font-light max-w-xs leading-relaxed">
+                    Turn lectures into mastery
+                  </p>
+                </div>
+
+                {/* Bottom Open Prompt with gentle breath animation */}
+                <div className="absolute z-20 left-0 right-0 bottom-5 sm:bottom-6 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.22em] text-[#d6ad5f] animate-[breathe_3s_infinite_ease-in-out] pointer-events-none">
+                  <svg className="w-4 h-4 stroke-[#d6ad5f] fill-none stroke-[1.5]" viewBox="0 0 24 24" strokeLinejoin="round">
+                    <path d="M3 5.5C5 4.5 8.5 4.5 12 6.5c3.5-2 7-2 9-1V19c-2-1-5.5-1-9 1-3.5-2-7-2-9-1zM12 6.5V20" />
+                  </svg>
+                  <span>Click to open notebook</span>
+                </div>
+              </div>
+
+              {/* --- BACK COVER FACE = INSIDE LEFT SPREAD (Visible when open) --- */}
+              <div 
+                className="absolute inset-0 rounded-l-2xl border border-[#2a251b] bg-gradient-to-l from-[#0f0d0a] to-[#16140f] book-page-stack-left flex flex-col overflow-hidden p-5 sm:p-7 md:p-8 archival-scroll overflow-y-auto"
+                style={{
+                  transform: "rotateY(180deg)",
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                }}
+              >
+                {/* Spine crease shadow on inside left */}
+                <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-black/50 to-transparent pointer-events-none z-20" />
+
+                {/* Left Page Custom Content (Summary / Orientation / Assessment Index / Certificate) */}
+                <div className="relative z-10 w-full h-full flex flex-col justify-between">
+                  {leftPageContent}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Double-Page Book Container */}
-      <div className="relative w-full aspect-[16/10] min-h-[580px] perspective-2000 flex items-stretch">
-        
-        {/* Desk Ambient Cast Shadow under Book */}
-        <div className="absolute -bottom-8 left-[3%] right-[3%] h-14 bg-black/80 blur-3xl rounded-[40px] pointer-events-none" />
-
-        {/* The Open Notebook Outer Leather / Binding Border */}
-        <div className="relative w-full h-full bg-[#1A1918] rounded-2xl p-2.5 sm:p-4 book-outer-shadow border border-[#3A3835] flex items-stretch overflow-hidden">
-          
-          {/* Top Ledger Navigation Tabs */}
-          <nav
-            aria-label="Notebook chapters navigation"
-            className="absolute top-2 right-8 z-30 flex items-center gap-2 sm:gap-4"
+      {/* Floating Bottom Quick-Nav when Book is Open */}
+      {isBookOpen && (
+        <div className="mt-8 flex items-center gap-4 z-20">
+          <button
+            onClick={closeBook}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#2a251b] bg-[#16140f]/80 text-[#8d877a] hover:text-[#d6ad5f] hover:border-[#8a6d3b] text-xs font-sans uppercase tracking-widest transition-all shadow-md"
           >
-            {TABS.map((tab) => {
-              const isActive = currentPage === tab.id;
-              const isDisabled = tab.id !== "upload" && !generatedData;
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Close Tome</span>
+          </button>
+
+          {/* Chapters Pills */}
+          <div className="flex items-center gap-1.5 p-1 rounded-full border border-[#2a251b] bg-[#16140f]/80">
+            {(["upload", "notes", "quiz", "export"] as const).map((tab) => {
+              const isActive = currentPage === tab;
+              const isAllowed = tab === "upload" || Boolean(generatedData);
 
               return (
                 <button
-                  key={tab.id}
-                  disabled={isDisabled}
-                  onClick={() => turnToPage(tab.id)}
-                  aria-label={`Navigate to ${tab.label}`}
+                  key={tab}
+                  disabled={!isAllowed}
+                  onClick={() => turnToPage(tab)}
                   className={`
-                    relative px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-serif uppercase tracking-[0.2em] rounded-t-md transition-all duration-300
+                    px-3 py-1 rounded-full text-[10px] font-sans uppercase tracking-[0.18em] transition-all
                     ${isActive 
-                      ? "bg-[#F8F6F0] text-[#242220] font-semibold shadow-md translate-y-1" 
-                      : isDisabled
-                      ? "bg-[#252422] text-[#6E6B66] cursor-not-allowed opacity-50"
-                      : "bg-[#2C2A28] text-[#B5AEA4] hover:text-brand-gold hover:bg-[#383532]"
-                    }
+                      ? "bg-[#d6ad5f] text-[#0b0a09] font-bold shadow-sm" 
+                      : isAllowed 
+                        ? "text-[#8d877a] hover:text-[#ece6d8]" 
+                        : "text-[#4a463e] cursor-not-allowed opacity-30"}
                   `}
                 >
-                  {tab.label}
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-0 right-0 h-1.5 bg-[#F8F6F0]" />
-                  )}
+                  {tab}
                 </button>
               );
             })}
-          </nav>
-
-          {/* Animated Page Flip Body Container */}
-          <div className="relative w-full h-full preserve-3d">
-            <AnimatePresence mode="wait" custom={flipDirection}>
-              <motion.div
-                key={currentPage}
-                custom={flipDirection}
-                variants={flipVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="w-full h-full flex rounded-xl overflow-hidden shadow-2xl relative"
-                style={{
-                  transformStyle: "preserve-3d",
-                }}
-              >
-                {children}
-
-                {/* Central Spine Shadow & Crease Overlay */}
-                <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-12 pointer-events-none z-20 flex">
-                  {/* Left inner shadow */}
-                  <div className="w-1/2 h-full bg-gradient-to-r from-transparent to-black/25" />
-                  {/* Spine binding line */}
-                  <div className="w-[1px] h-full bg-black/40" />
-                  {/* Right inner shadow */}
-                  <div className="w-1/2 h-full bg-gradient-to-l from-transparent to-black/25" />
-                </div>
-              </motion.div>
-            </AnimatePresence>
           </div>
-
         </div>
-      </div>
+      )}
     </div>
   );
 }
-

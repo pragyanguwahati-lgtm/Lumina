@@ -29,12 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
-      <body className="antialiased min-h-screen flex flex-col relative selection:bg-brand-gold/30 selection:text-brand-primary">
+      <body className="antialiased min-h-screen flex flex-col relative selection:bg-[#d6ad5f]/30 selection:text-[#f6d78c] bg-[#0b0a09]">
         <BookProvider>
           <LenisProvider>
             <Atmosphere />
             <Navigation />
-            <main className="flex-grow relative z-10 pt-16">
+            <main className="flex-grow relative z-10 pt-20">
               {children}
             </main>
           </LenisProvider>
