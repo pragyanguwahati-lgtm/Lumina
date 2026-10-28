@@ -43,4 +43,6 @@ next-env.d.ts
 # local agent and scratch artifacts
 artifacts/
 scratch/
+graphify-out/
+
 
