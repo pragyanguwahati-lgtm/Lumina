@@ -1,44 +1,66 @@
 # 🕯️ LUMINA
 
 <div align="center">
-  <p><strong>Turn raw lectures into mastery. An AI-powered, cinematic workspace for students.</strong></p>
-  
-  [![Next.js](https://img.shields.io/badge/Next.js-16+-black?style=for-the-badge&logo=next.js)](#)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](#)
-  [![Framer Motion](https://img.shields.io/badge/Framer_Motion-E10098?style=for-the-badge&logo=framer)](#)
-  [![Gemini AI](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google)](#)
+  <h3>Turn raw lectures into enduring academic mastery.</h3>
+  <p>An archival, 3D-bound illuminated workspace powered by open-source intelligence and zero-key local synthesis.</p>
+
+  [![Next.js](https://img.shields.io/badge/Next.js-16_%7C_Turbopack-000000?style=for-the-badge&logo=next.js&logoColor=white)](#)
+  [![Groq](https://img.shields.io/badge/Groq_LPU-500+_tok/s-F55036?style=for-the-badge&logo=fastapi&logoColor=white)](#)
+  [![Ollama](https://img.shields.io/badge/Ollama-Zero_Keys_Local-FFFFFF?style=for-the-badge&logo=ollama&logoColor=black)](#)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](#)
+  [![Framer Motion](https://img.shields.io/badge/Framer_Motion-Tactile_3D-E10098?style=for-the-badge&logo=framer&logoColor=white)](#)
 </div>
 
 ---
 
-## 📖 About The Project
+## 📖 Overview
 
-**LUMINA** is a premium, Awwwards-inspired educational platform designed to help students extract high-yield knowledge from their study materials. By simply dragging and dropping a lecture document, LUMINA uses Google's Gemini 3.5 Flash AI to instantly synthesize the material into comprehensive **Revision Notes**, a **Practice Quiz**, and a beautifully bound **PDF Export**.
+**Lumina** reimagines lecture summarization through the physical metaphor of a luxury illuminated manuscript. Built with an obsidian archival aesthetic, interactive 3D cover tilt, floating dust motes, and cursor-following hairline spotlight borders, Lumina transforms dense lecture PDFs, documents, or raw notes into a multi-spread academic tome.
 
-Designed with deep focus in mind, the UI features a "late-night study" aesthetic—blending analog film grain, faint graph paper, and a cozy cinematic desk-lamp glow to create a mesmerizing but distraction-free environment.
-
-### ✨ Features
-- **Cinematic Workflow**: Smooth, framer-motion powered transitions that make interacting with the app feel like magic.
-- **Instant Synthesis**: Automatically extracts Executive Summaries, Key Concepts, Definitions, Formulas, and Memory Shortcuts.
-- **Interactive Quizzing**: Dynamically generates MCQs, True/False, and short answer questions to test your mastery.
-- **One-Click Export**: Binds your generated notes into a clean, distraction-free PDF for offline studying.
-- **Deep Focus UI**: A dark-mode exclusive, archival-paper aesthetic built to reduce eye strain and keep you in the flow.
+Under the hood, Lumina pairs a **parallel multi-agent intelligence pipeline** (Groq LPU open-source models & local Ollama) with a **pure-JavaScript local synthesizer** that runs in ~50ms with **zero external API keys**.
 
 ---
 
-## 🚀 Live Demo
+## ✨ Key Features
 
-Experience LUMINA live here: **[https://lumina-seven-dusky.vercel.app/](https://lumina-seven-dusky.vercel.app/)**
+### 📚 1. Tactile 3D Archival Tome
+* **180° Double-Page Spreads**: Smooth page-turning transitions powered by Framer Motion and procedural marble textures.
+* **Interactive 3D Cover Physics**: Gyroscopic tilt reacting dynamically to mouse movement.
+* **Spotlight Hairline Borders**: 21st.dev-inspired cursor-following radial masks along 1px gold hairline borders.
+* **Tactile Audio Feedback**: Synthesized Web Audio parchment page flips and seal strikes.
+* **Fluid Responsive Geometry**: Adapts seamlessly from 1440px desktop workstations down to 375px mobile screens.
+
+### 🧠 2. Specialized Academic Breakdown
+* **Executive Summary & Key Concepts**: Extractive semantic ranking distilling foundational invariants and principles.
+* **`</> Code` Terminal**: Identifies algorithms and data structures, highlights syntax, provides one-click copy, and automatically calculates **Big-O time and space complexity**.
+* **Worked Numerical Derivations**: Parses mathematical parameters, physics units (`eV`, `ns`, `m/s`, `Hz`), and formats step-by-step boxed derivation cards.
+* **Mermaid Architecture Flowcharts**: Generates clean, topological concept hierarchy maps.
+* **Adaptive Practice Quiz**: 5-question examination (MCQs, True/False, and Short Answer) with immediate scoring, rationale, and feedback.
+
+### 📄 3. In-Memory PDF Processing & Print Export
+* **Pure-JS Serverless PDF Parsing**: In-memory text extraction via `unpdf` with zero native dependencies or binary bloat.
+* **Distraction-Free PDF Export**: Client-side compiled PDF notebook binding executive notes, code routines, numerical solutions, and practice quizzes for offline mastery.
 
 ---
 
-## 💻 Running Locally
+## ⚡ 3 Flexible Execution Modes
 
-To run LUMINA on your local machine, follow these steps:
+Lumina is designed to work anywhere—from a completely offline airplane mode to high-speed cloud serverless:
+
+| Execution Mode | API Key Needed? | Where It Runs | Response Latency | Ideal For |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Built-in Local Engine** *(Default)* | **None (0 keys)** | In-memory on client / Vercel | **~50 ms** | Zero-setup, instant offline execution |
+| **2. Groq Cloud Open-Source** | Free Key (`gsk_...`) | Cloud LPUs (Llama 3.3 & Qwen) | **~1 - 3 sec** | Live production hosting on Vercel |
+| **3. Local Ollama LLMs** | **None (0 keys)** | Your computer's CPU/GPU | **~2 - 5 sec** | 100% private local neural network execution |
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/en/) (v18 or higher recommended)
-- A [Google Gemini API Key](https://aistudio.google.com/app/apikey)
+* [Node.js](https://nodejs.org/) (v18.0.0 or higher)
+* `npm` or `pnpm`
 
 ### Installation
 
@@ -53,33 +75,114 @@ To run LUMINA on your local machine, follow these steps:
    npm install
    ```
 
-3. **Set up Environment Variables:**
-   Create a `.env.local` file in the root directory and add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_google_gemini_api_key_here
+3. **Configure Environment (Optional):**
+   Lumina works **out of the box with zero keys**! If you want to enable cloud open-source LLMs or local Ollama, create a `.env.local` file:
+
+   ```bash
+   # Option A: Groq Cloud Open-Source (Recommended for Vercel)
+   GROQ_API_KEY=gsk_your_free_groq_key_here
+
+   # Option B: Local Ollama (Zero API keys, runs on your GPU)
+   # USE_OLLAMA=true
+   # OLLAMA_BASE_URL=http://127.0.0.1:11434
    ```
 
-4. **Start the development server:**
+4. **Launch development server:**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the application running.
+5. **Open Lumina:**
+   Navigate to [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🛠️ Built With
+## 🌐 Deploying to Vercel
 
-- **[Next.js 16](https://nextjs.org/)** (App Router & Turbopack)
-- **[Google Gemini AI SDK](https://ai.google.dev/)** (`gemini-3.5-flash`)
-- **[Tailwind CSS](https://tailwindcss.com/)** for styling
-- **[Framer Motion](https://www.framer.com/motion/)** for cinematic animations
-- **[@react-pdf/renderer](https://react-pdf.org/)** for client-side PDF generation
-- **[Lenis](https://lenis.studiofreight.com/)** for buttery smooth scrolling
+Lumina is optimized for free Vercel serverless deployment:
+
+1. Push your repository to GitHub.
+2. Import the project in your [Vercel Dashboard](https://vercel.com/new).
+3. In **Project Settings → Environment Variables**, add:
+   * **`GROQ_API_KEY`**: `your_free_key_from_console.groq.com`
+4. Click **Deploy**.
+
+> **Note:** If no `GROQ_API_KEY` is provided, Lumina automatically falls back to its built-in JavaScript synthesis engine with zero configuration.
+
+---
+
+## 🔬 Multi-Agent Orchestrator Architecture
+
+When cloud or Ollama inference is enabled, Lumina runs a parallel 6-agent delegation graph:
+
+```
+                  ┌──────────────────────┐
+                  │    Uploaded PDF      │
+                  └──────────┬───────────┘
+                             │ (unpdf in-memory)
+                             ▼
+                  ┌──────────────────────┐
+                  │   Delegator Agent    │
+                  └──────────┬───────────┘
+                             │
+     ┌───────────────────────┼───────────────────────┐
+     ▼                       ▼                       ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Conceptual  │     │     Code     │     │  Numericals  │
+│  Notes Agent │     │  Specialist  │     │  Specialist  │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │
+       ├────────────────────┴────────────────────┤
+       ▼                                         ▼
+┌──────────────┐                          ┌──────────────┐
+│   Diagram    │                          │     Quiz     │
+│  Specialist  │                          │  Assessment  │
+└──────┬───────┘                          └──────┬───────┘
+       │                                         │
+       └────────────────────┬────────────────────┘
+                            ▼
+              ┌───────────────────────────┐
+              │    Compiled Archival      │
+              │       Master Tome         │
+              └───────────────────────────┘
+```
+
+* **Delegator Agent**: Analyzes document layout, extracts refined chapter titles, and flags code/numerical domains.
+* **Conceptual Notes Agent**: Distills executive summaries, core principles, definitions, formulas, and mnemonic shortcuts.
+* **Code & Algorithm Specialist**: Synthesizes clean implementations and audits Big-O time and space complexity.
+* **Math & Numericals Specialist**: Isolates variables, identifies governing formulas, and formats step-by-step derivations.
+* **Visual Diagram Specialist**: Generates valid topological Mermaid.js flowchart hierarchies.
+* **Assessment & Quiz Agent**: Drafts a rigorous 5-question examination with diagnostic rationale.
+
+---
+
+## 🧪 Testing
+
+Lumina includes an automated Jest and React Testing Library suite verifying navigation, accessibility, and component rendering:
+
+```bash
+# Run unit tests
+npm test
+
+# Run TypeScript type safety check
+npx tsc --noEmit
+```
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+* **Styling & Design System**: Vanilla CSS tokens, Tailwind CSS, custom marble SVGs
+* **Animation**: [Framer Motion](https://www.framer.com/motion/) (3D perspective transforms, tactile page flips)
+* **LLM Engine**: [Groq](https://groq.com/) (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`), [Ollama](https://ollama.ai/), and built-in pure-JS synthesizer
+* **PDF Extraction**: [`unpdf`](https://github.com/unjs/unpdf) (Pure JavaScript, serverless-native)
+* **PDF Export**: [`@react-pdf/renderer`](https://react-pdf.org/)
+* **Diagrams**: [Mermaid.js](https://mermaid.js.org/)
+* **Typography**: Cormorant Garamond, Inter, JetBrains Mono
 
 ---
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for details.
